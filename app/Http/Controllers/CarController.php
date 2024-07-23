@@ -38,4 +38,38 @@ class CarController extends Controller
     return view('cars.show', compact('car'));
 }
 
+    public function edit(Car $car)
+    {
+        return view('cars.edit', compact('car'));
+    }
+
+    public function update(Request $request, $id)
+{
+    // Validate the incoming request
+    $request->validate([
+        'friend_name' => 'required|string|max:255',
+        'car_type' => 'required|string|max:255',
+        'car_cost' => 'required|string', // Validate as string, will clean and convert
+        'date_bought' => 'required|date',
+    ]);
+
+    $car = Car::find($id);
+
+    // Sanitize and convert the car_cost
+    $carCost = $request->input('car_cost');
+    $carCost = str_replace(['R', ',', ' '], '', $carCost); // Remove 'R', commas, and spaces
+    $carCost = (float) $carCost; // Convert to float
+
+    // Update the car details
+    $car->friend_name = $request->input('friend_name');
+    $car->car_type = $request->input('car_type');
+    $car->car_cost = $carCost;
+    $car->date_bought = $request->input('date_bought');
+
+    $car->save();
+
+    return redirect()->route('cars.show', $car->id)
+                     ->with('success', 'Car updated successfully');
+}
+
 }
